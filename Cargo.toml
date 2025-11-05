@@ -1,0 +1,34 @@
+[package]
+name = "fwon-rs" # Tên crate rõ ràng cho Rust
+version = "0.1.0"
+edition = "2024" # Dùng Edition 2024
+description = "High-performance generator for FWON (File With Object Notation) data format."
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/TeaserLang/fwon-rs" 
+authors = ["Teaserverse <contact@teaserverse.online>"]
+
+keywords = ["fwon", "data-generator", "high-performance", "serialization", "rayon"]
+categories = ["command-line-utilities", "development-tools::build-utils", "encoding"]
+
+[dependencies]
+# Core dependencies for data generation
+rand = "0.8.5"
+itoa = "1.0.11"
+ryu = "1.0.18"
+rayon = "1.10.0"
+
+[features]
+# Feature này được dùng để kích hoạt CLI/Benchmark
+cli = ["dep:clap"] # Sửa: Dùng dep:clap để tham chiếu rõ ràng
+
+[dependencies.clap]
+version = "4.5.10"
+features = ["derive"]
+optional = true 
+
+# KHẮC PHỤC LỖI: Khai báo Binary Target nội bộ (src/main.rs)
+# Và chỉ định rằng nó yêu cầu feature "cli"
+[[bin]]
+name = "fwon-rs-bench" # Đặt tên binary rõ ràng để phân biệt với library
+path = "src/main.rs"
+required-features = ["cli"]
