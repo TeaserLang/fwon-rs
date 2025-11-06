@@ -19,7 +19,7 @@ To use `fwon-rs` in your project (e.g., in a high-speed data pipeline):
 1. **Add to `Cargo.toml`**
 ```toml
 [dependencies]
-fwon-rs = "0.1" # Use the latest version
+fwon-rs = "0.1.2" # Use the latest version
 ```
 
 2. **Generate Records**
@@ -51,6 +51,22 @@ For internal testing and benchmarking (using the `src/main.rs` binary), you must
 ```bash
 # Did not included in the crate, you must clone the repository
 cargo run --features="cli" --bin fwon-rs-bench --release -- benchmark.fwon 100000
+```
+
+## Speed Demo
+
+This is the benchmark result using a standard SSD disk to write:
+```
+Using fwon-rs crate to generate and write 100000 FWON records to file 'benchmark.fwon'...
+
+--- FWON WRITE BENCHMARK (Internal) ---
+Total records written: 100000
+Time (Data Gen CPU):   0.145744 seconds
+Time (File Write I/O): 0.051216 seconds
+----------------------------------------------
+Total Time (Gen + I/O):  0.196961 seconds
+WRITE Rate (I/O Only):   1952514.84 records/second
+WRITE Rate (Overall):    507715.24 records/second
 ```
 
 ## License
