@@ -57,4 +57,7 @@ jobs:
       # Lệnh 'cargo publish' sẽ tự động tìm và sử dụng token ngắn hạn.
       # KHÔNG cần khai báo token thủ công.
       - name: Publish to Crates.io
+        # Đảm bảo lệnh này chạy trong thư mục gốc của crate.
+        # Thường là thư mục làm việc mặc định, nhưng nên khai báo rõ ràng.
         run: cargo publish
+        working-directory: ${{ github.workspace }} # <--- ĐÃ THÊM DÒNG NÀY
