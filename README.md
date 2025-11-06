@@ -1,6 +1,6 @@
 # fwon-rs: High-Performance FWON Data Generator for Rust
 
-`fwon-rs` is a highly optimized Rust library for generating data in the proprietary File With Object Notation (FWON) format. Designed for speed, it leverages parallel processing and zero-allocation techniques to achieve over 600,000 records per second in generation and I/O.
+`fwon-rs` is a highly optimized Rust library for generating data in the proprietary **Fast Write Object Notation (FWON)** format. Designed for **write** speed, it leverages parallel processing and zero-allocation techniques to achieve over 600,000 records per second in generation and I/O.
 
 > Since this project is experimental, it may be unstable and will have bugs.
 
