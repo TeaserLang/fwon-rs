@@ -47,9 +47,14 @@ jobs:
             ${{ runner.os }}-cargo-v3-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-v3-
 
-      # --- BƯỚC KHẮC PHỤC LỖI: TẠO TOKEN VÀ PUBLISH TRONG CÙNG MỘT SHELL SESSION ---
-      - name: Authenticate and Publish to Crates.io
+      # 1. TẠO TOKEN VÀ LƯU VÀO OUTPUT
+      - name: Authenticate with crates.io (Trusted Publishing)
+        id: auth_step # Đặt ID cho bước để tham chiếu đến output của nó
         uses: rust-lang/crates-io-auth-action@v1
-        # Action này sẽ tự động thiết lập biến môi trường CARGO_REGISTRY_TOKEN
-        # Sau đó, chúng ta chạy lệnh `cargo publish` trong cùng một bước.
+        
+      # 2. SỬ DỤNG TOKEN ĐỂ PUBLISH
+      - name: Publish to Crates.io
         run: cargo publish
+        # Thiết lập biến môi trường CARGO_REGISTRY_TOKEN cho bước này bằng token đã lấy ở bước trên
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth_step.outputs.token }} # Lấy token từ output của bước có ID là 'auth_step'
