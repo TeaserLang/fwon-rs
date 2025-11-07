@@ -1,6 +1,6 @@
 [package]
 name = "fwon-rs" # Tên crate rõ ràng cho Rust
-version = "0.1.2"
+version = "0.2.0"
 edition = "2024" # Dùng Edition 2024
 description = "High-performance generator for FWON (Fast Write Object Notation) data format."
 license = "AGPL-3.0-or-later"

@@ -5,6 +5,12 @@ use itoa;
 use ryu;
 use rayon::prelude::*;
 
+// THÊM MỚI: Imports cho I/O và đo thời gian
+use std::fs::File;
+use std::io::{self, BufWriter, Write};
+use std::time::Instant;
+
+
 // Chúng ta định nghĩa một module public tên là `generator`
 pub mod generator {
     // Import các dependencies từ bên ngoài module
@@ -62,6 +68,7 @@ pub mod generator {
             let email_prefix = random_string(rng, 5);
             buffer.extend_from_slice(b"Email=");
             buffer.extend_from_slice(email_prefix.as_bytes());
+            // Sử dụng domain của bạn từ thông tin đã chia sẻ
             buffer.extend_from_slice(b"@teaserverse.com");
             buffer.extend_from_slice(NL); 
 
@@ -84,6 +91,7 @@ pub mod generator {
             buffer.extend_from_slice(NL);
             
             // Hằng số (dự án của Teaserverse)
+            // Lấy dự án từ thông tin bạn đã chia sẻ
             buffer.extend_from_slice(b"FavoriteProjects=TeaserWorkspace,TeaserPaste,EmmieryAI"); 
             buffer.extend_from_slice(NL);
 
@@ -143,7 +151,7 @@ pub mod generator {
             .collect()
     }
 
-    /// Một hàm tiện ích (helper) public để tạo song song
+    /// Một hàm tiện ích (helper) public để tạo song song (chỉ CPU-bound)
     pub fn generate_records_parallel(num_records: u64) -> Vec<Vec<u8>> {
         (0..num_records)
             .into_par_iter()
@@ -154,5 +162,69 @@ pub mod generator {
                 FwonRecordGenerator::generate_record_bytes(record_id, &mut rng)
             })
             .collect() // Thu thập kết quả (có thứ tự)
+    }
+
+    // --- THÊM MỚI: Hàm tiện ích tích hợp I/O ---
+
+    /// Kết quả benchmark, trả về thời gian (tính bằng giây)
+    #[derive(Debug, Clone, Copy)]
+    pub struct BenchmarkResult {
+        /// Thời gian chỉ để tạo dữ liệu (CPU-bound)
+        pub gen_time_sec: f64,
+        /// Thời gian chỉ để ghi file (I/O-bound)
+        pub write_time_sec: f64,
+        /// Tổng thời gian (Gen + I/O)
+        pub total_time_sec: f64,
+    }
+
+    /// TẠO VÀ GHI song song các bản ghi vào file, sử dụng I/O tối ưu.
+    ///
+    /// Hàm này sao chép logic từ `main.rs` (binary) để cung cấp
+    /// một hàm tiện ích hiệu suất cao trong thư viện.
+    ///
+    /// # Arguments
+    /// * `num_records` - Số lượng bản ghi cần tạo.
+    /// * `filepath` - Đường dẫn file để ghi dữ liệu.
+    ///
+    /// # Returns
+    /// Trả về `io::Result` chứa `BenchmarkResult` với thông tin thời gian.
+    pub fn generate_and_write_records_parallel(
+        num_records: u64,
+        filepath: &str,
+    ) -> io::Result<BenchmarkResult> {
+        
+        let start_total_time = Instant::now();
+
+        // ---- STEP 1: DATA GENERATION (CPU-BOUND) ----
+        let start_gen_time = Instant::now();
+        // Gọi hàm song song đã có của thư viện
+        let all_records: Vec<Vec<u8>> = generate_records_parallel(num_records);
+        let end_gen_time = Instant::now();
+
+        // ---- STEP 2: DATA WRITING (I/O-BOUND) ----
+        let start_write_time = Instant::now();
+        
+        let file = File::create(filepath)?;
+        // Sử dụng BufWriter dung lượng lớn (8MB) như trong main.rs
+        let mut writer = BufWriter::with_capacity(8 * 1024 * 1024, file);
+
+        for record_bytes in all_records {
+            writer.write_all(&record_bytes)?;
+        }
+
+        // Đẩy tất cả dữ liệu vào disk
+        writer.flush()?;
+        let end_write_time = Instant::now();
+
+        // --- TÍNH TOÁN KẾT QUẢ ---
+        let gen_time_sec = end_gen_time.duration_since(start_gen_time).as_secs_f64();
+        let write_time_sec = end_write_time.duration_since(start_write_time).as_secs_f64();
+        let total_time_sec = end_write_time.duration_since(start_total_time).as_secs_f64();
+
+        Ok(BenchmarkResult {
+            gen_time_sec,
+            write_time_sec,
+            total_time_sec,
+        })
     }
 }

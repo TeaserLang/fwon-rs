@@ -19,28 +19,27 @@ To use `fwon-rs` in your project (e.g., in a high-speed data pipeline):
 1. **Add to `Cargo.toml`**
 ```toml
 [dependencies]
-fwon-rs = "0.1.2" # Use the latest version
+fwon-rs = "0.2.0" # Use the latest version
 ```
 
-2. **Generate Records**
+2. **Generate and Write Records (Optimized)**
 
-The library's core function generates records in parallel across all available CPU cores.
+Use the built-in function `generate_and_write_records_parallel` to handle parallel data generation (CPU-bound) and optimized file writing (Buffered I/O) in a single call:
 ```rust
 use fwon_rs::generator;
-use std::io::{self, Write};
-use std::fs::File;
+use std::io;
 
 fn main() -> io::Result<()> {
     const NUM_RECORDS: u64 = 1_000_000;
+    const FILEPATH: &str = "output.fwon";
     
-    // Generates Vec<Vec<u8>> in parallel
-    let all_records = generator::generate_records_parallel(NUM_RECORDS);
+    // Tạo và ghi 1 triệu bản ghi vào file một cách song song và tối ưu I/O.
+    let result = generator::generate_and_write_records_parallel(NUM_RECORDS, FILEPATH)?;
 
-    // Write to file (I/O is sequential for simplicity)
-    let mut file = File::create("output.fwon")?;
-    for record_bytes in all_records {
-        file.write_all(&record_bytes)?;
-    }
+    println!("Ghi thành công {} records vào '{}'", NUM_RECORDS, FILEPATH);
+    println!("Thời gian tạo dữ liệu (CPU): {:.4}s", result.gen_time_sec);
+    println!("Thời gian ghi file (I/O): {:.4}s", result.write_time_sec);
+    
     Ok(())
 }
 ```
