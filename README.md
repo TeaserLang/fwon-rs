@@ -70,4 +70,4 @@ WRITE Rate (Overall):    507715.24 records/second
 
 ## License
 
-This project is licensed under the **AGPL-3.0-or-later**.
+This project is licensed under the **Apache 2.0 License**.
